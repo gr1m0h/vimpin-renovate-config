@@ -1,0 +1,32 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Renovate managers for lazy.nvim / packer.nvim Lua plugin specs that pin commit + tag (or branch). Field order must be: \"owner/repo\", commit = \"...\", tag/branch = \"...\".",
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Lua spec: tag-tracked pin (commit + tag)",
+      "managerFilePatterns": [
+        "\\.lua$"
+      ],
+      "matchStrings": [
+        "\"(?<depName>[^\"]+/[^\"]+)\"\\s*,\\s*commit\\s*=\\s*\"(?<currentDigest>[a-f0-9]{40})\"\\s*,\\s*tag\\s*=\\s*\"(?<currentValue>[^\"]+)\"",
+        "\"(?<depName>[^\"]+/[^\"]+)\"\\s*,\\s*version\\s*=\\s*\"(?<currentValue>[^\"]+)\"\\s*,\\s*commit\\s*=\\s*\"(?<currentDigest>[a-f0-9]{40})\""
+      ],
+      "datasourceTemplate": "github-tags",
+      "packageNameTemplate": "{{depName}}"
+    },
+    {
+      "customType": "regex",
+      "description": "Lua spec: branch-tracked pin (commit + branch)",
+      "managerFilePatterns": [
+        "\\.lua$"
+      ],
+      "matchStrings": [
+        "\"(?<depName>[^\"]+/[^\"]+)\"\\s*,\\s*commit\\s*=\\s*\"(?<currentDigest>[a-f0-9]{40})\"\\s*,\\s*branch\\s*=\\s*\"(?<currentValue>[^\"]+)\"",
+        "\"(?<depName>[^\"]+/[^\"]+)\"\\s*,\\s*branch\\s*=\\s*\"(?<currentValue>[^\"]+)\"\\s*,\\s*commit\\s*=\\s*\"(?<currentDigest>[a-f0-9]{40})\""
+      ],
+      "datasourceTemplate": "git-refs",
+      "packageNameTemplate": "https://github.com/{{depName}}"
+    }
+  ]
+}

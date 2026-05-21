@@ -1,0 +1,30 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Renovate manager for vimpin.toml manifests.",
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "vimpin.toml: tag-tracked entries (commit + tag)",
+      "managerFilePatterns": [
+        "(^|/)vimpin\\.toml$"
+      ],
+      "matchStrings": [
+        "repo\\s*=\\s*\"(?<depName>[^\"]+)\"\\s*\\ncommit\\s*=\\s*\"(?<currentDigest>[a-f0-9]{40})\"\\s*\\ntag\\s*=\\s*\"(?<currentValue>[^\"]+)\""
+      ],
+      "datasourceTemplate": "github-tags",
+      "packageNameTemplate": "{{depName}}"
+    },
+    {
+      "customType": "regex",
+      "description": "vimpin.toml: branch-tracked entries (commit + branch, no tag)",
+      "managerFilePatterns": [
+        "(^|/)vimpin\\.toml$"
+      ],
+      "matchStrings": [
+        "repo\\s*=\\s*\"(?<depName>[^\"]+)\"\\s*\\ncommit\\s*=\\s*\"(?<currentDigest>[a-f0-9]{40})\"\\s*\\nbranch\\s*=\\s*\"(?<currentValue>[^\"]+)\""
+      ],
+      "datasourceTemplate": "git-refs",
+      "packageNameTemplate": "https://github.com/{{depName}}"
+    }
+  ]
+}
