@@ -1,0 +1,42 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Renovate managers for lazy.nvim lazy-lock.json. Entries must include a 'url' field so the plugin's owner/repo can be derived from the JSON alone; default lazy.nvim does not emit url for github.com plugins, so see the README for the lazy-pin-extract.lua helper that augments the lockfile.",
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "lazy-lock.json: GitHub entry with branch + commit + url",
+      "managerFilePatterns": [
+        "(^|/)lazy-lock\\.json$"
+      ],
+      "matchStrings": [
+        "\"branch\"\\s*:\\s*\"(?<currentValue>[^\"]+)\"\\s*,\\s*\"commit\"\\s*:\\s*\"(?<currentDigest>[a-f0-9]{40})\"\\s*,\\s*\"url\"\\s*:\\s*\"https?://github\\.com/(?<depName>[^\"]+?)(?:\\.git)?\""
+      ],
+      "datasourceTemplate": "git-refs",
+      "packageNameTemplate": "https://github.com/{{depName}}"
+    },
+    {
+      "customType": "regex",
+      "description": "lazy-lock.json: GitLab entry with branch + commit + url",
+      "managerFilePatterns": [
+        "(^|/)lazy-lock\\.json$"
+      ],
+      "matchStrings": [
+        "\"branch\"\\s*:\\s*\"(?<currentValue>[^\"]+)\"\\s*,\\s*\"commit\"\\s*:\\s*\"(?<currentDigest>[a-f0-9]{40})\"\\s*,\\s*\"url\"\\s*:\\s*\"(?<packageName>https?://gitlab\\.com/[^\"]+?)(?:\\.git)?\""
+      ],
+      "datasourceTemplate": "git-refs",
+      "depNameTemplate": "{{packageName}}"
+    },
+    {
+      "customType": "regex",
+      "description": "lazy-lock.json: sourcehut entry with branch + commit + url",
+      "managerFilePatterns": [
+        "(^|/)lazy-lock\\.json$"
+      ],
+      "matchStrings": [
+        "\"branch\"\\s*:\\s*\"(?<currentValue>[^\"]+)\"\\s*,\\s*\"commit\"\\s*:\\s*\"(?<currentDigest>[a-f0-9]{40})\"\\s*,\\s*\"url\"\\s*:\\s*\"(?<packageName>https?://git\\.sr\\.ht/[^\"]+)\""
+      ],
+      "datasourceTemplate": "git-refs",
+      "depNameTemplate": "{{packageName}}"
+    }
+  ]
+}

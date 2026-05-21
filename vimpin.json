@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "Renovate manager for vimpin.toml manifests.",
+  "description": "Renovate managers for vimpin.toml manifests. Supports tag-tracked, branch-tracked, and tag-only (no commit) entries.",
   "customManagers": [
     {
       "customType": "regex",
@@ -25,6 +25,18 @@
       ],
       "datasourceTemplate": "git-refs",
       "packageNameTemplate": "https://github.com/{{depName}}"
+    },
+    {
+      "customType": "regex",
+      "description": "vimpin.toml: tag-only entries (tag without commit; vimpin pin will fill in commit later, Renovate bumps the tag here)",
+      "managerFilePatterns": [
+        "(^|/)vimpin\\.toml$"
+      ],
+      "matchStrings": [
+        "repo\\s*=\\s*\"(?<depName>[^\"]+)\"\\s*\\ntag\\s*=\\s*\"(?<currentValue>[^\"]+)\"(?!\\s*\\ncommit)"
+      ],
+      "datasourceTemplate": "github-tags",
+      "packageNameTemplate": "{{depName}}"
     }
   ]
 }
