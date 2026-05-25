@@ -1,6 +1,10 @@
 # vimpin-renovate-config
 
-Renovate preset for pinning Vim/Neovim plugins by commit hash. Works with or without [vimpin](https://github.com/gr1m0h/vimpin) — drop it into any dotfiles repo that pins plugins explicitly and Renovate will start opening update PRs.
+Renovate preset for keeping Vim/Neovim plugin pins up to date.
+
+Built to consume [vimpin](https://github.com/gr1m0h/vimpin)'s canonical
+Lua spec form, but the managers work on any Lua spec that follows the same
+layout — vimpin is not a requirement for using this preset.
 
 ## Use
 
@@ -13,176 +17,97 @@ In your dotfiles repo's `renovate.json`:
 }
 ```
 
-That enables every supported format below. If you only want one, pick the sub-preset:
+The default preset enables every supported manager. To pull in only one,
+extend the sub-preset directly:
 
 ```json
 { "extends": ["github>gr1m0h/vimpin-renovate-config:lua-pin"] }
 ```
 
-| Preset             | Targets                          | When to use |
-|--------------------|----------------------------------|-------------|
-| `:vimpin`          | `vimpin.toml`                    | vimpin is your source of truth |
-| `:lua-pin`         | `*.lua` plugin specs             | lazy.nvim / packer.nvim with inline `commit = "..."` |
-| `:vim-plug`        | `init.vim`, `*.vim`, `.vimrc`    | vim-plug with `'commit'` in the spec dict |
-| `:lazy-nvim-lock`  | `lazy-lock.json`                 | lazy.nvim's lockfile, **augmented with `url` fields** (see below) |
+| Preset             | Targets                | When to use |
+|--------------------|------------------------|-------------|
+| `:lua-pin`         | `*.lua` plugin specs   | lazy.nvim specs pinned in vimpin's canonical form |
+| `:lazy-nvim-lock`  | `lazy-lock.json`       | lazy.nvim's lockfile, **augmented with `url` fields** (see below) |
 
-The bare `github>gr1m0h/vimpin-renovate-config` extends all four.
+The bare `github>gr1m0h/vimpin-renovate-config` extends both.
 
-## Supported formats
+## Supported Lua spec form
 
-### vimpin.toml
-
-```toml
-[[plugin]]
-repo = "ggandor/leap.nvim"
-commit = "abc1234567890abcdef0123456789abcdef0123"  # 40-hex
-tag = "v0.1.5"      # or: branch = "main"
-```
-
-Tracking strategy is picked per entry:
-- `commit + tag` → `github-tags` datasource (tag tracking)
-- `commit + branch` → `git-refs` datasource (branch HEAD tracking)
-- `tag` only (no commit) → `github-tags` (tag bumped, `vimpin pin` fills the commit later)
-
-### lazy.nvim / packer.nvim Lua specs
-
-The Lua regex managers require the pinning fields to appear in a fixed
-order, **immediately after the repo name**:
-
-```
-repo  →  commit  →  tag | branch | version  →  (anything else)
-```
-
-This is the most common operational footgun. If Renovate stops finding an
-entry you just edited, the cause is almost always that `config`, `opts`,
-`event`, `keys`, etc. crept in between the repo and the pinning fields.
-
-#### Supported patterns
+The `:lua-pin` manager looks for entries shaped like vimpin's canonical
+output (commit hash abbreviated with `...` for readability):
 
 ```lua
--- tag-tracked pin (either order of commit/tag works)
-{ "ggandor/leap.nvim", commit = "abc1234567890abcdef0123456789abcdef0123", tag = "v0.1.5" }
+-- Form A: single-line spec
+{ "ggandor/leap.nvim", commit = "8a40d3aa...07b9079b" }, -- tag: v0.1.5
 
--- semver-tracked pin (version is treated as a semver range)
-{ "ggandor/leap.nvim", commit = "abc...", version = "^0.1" }
-
--- branch-tracked pin
-{ "folke/which-key.nvim", commit = "def5678...", branch = "main" }
-
--- tag-only tracking (no commit pin; Renovate bumps the tag when a newer release lands)
-{ "ggandor/leap.nvim", tag = "v0.1.5" }
-{ "ggandor/leap.nvim", version = "^0.1" }
-```
-
-Multi-line specs are supported as long as the matching fields appear consecutively, e.g.:
-
-```lua
+-- Form B: multi-line spec
 {
-  "ggandor/leap.nvim",
-  commit = "abc1234567890abcdef0123456789abcdef0123",
-  tag = "v0.1.5",
-  -- other settings (event, keys, config) may appear AFTER the pinning fields
+  "folke/which-key.nvim",
+  commit = "3aab2147...0a44c15a", -- branch: main
+  keys = { "<leader>" },
+  config = function() end,
 }
 ```
 
-#### Unsupported patterns (Renovate will silently skip)
+Two invariants must hold for Renovate to pick up the entry:
 
-```lua
--- repo and pinning fields separated by config — NOT matched
-{
-  "ggandor/leap.nvim",
-  event = "VeryLazy",
-  commit = "abc...",
-  tag = "v0.1.5",
-}
+1. **`commit` comes immediately after the positional repo string.** Between
+   the closing quote of the repo and the start of `commit = "..."` there
+   may be only whitespace (including newlines) and the comma separator. No
+   other fields belong in that slot.
+2. **The `-- tag: <ref>` or `-- branch: <ref>` annotation is on the same
+   line as the commit value.** For Form A, that line ends with the closing
+   `},`; for Form B, the annotation trails the commit field's value
+   directly. Either way the regex never has to span a newline between the
+   commit and its annotation.
 
--- config = function() before the pin — NOT matched
-{ "ggandor/leap.nvim", config = function() ... end, commit = "abc...", tag = "v0.1.5" }
-```
+vimpin emits this layout by construction. If you edit specs by hand, keep
+the field order — Renovate will silently skip non-conforming entries.
 
-#### Recommended guardrails
+### Branch tracking vs tag tracking
 
-Because the order is regex-based, the preset cannot warn you when an
-entry is silently skipped. Two practical mitigations:
-
-- **Use `vimpin generate`.** If your manifest lives in `vimpin.toml`, the
-  generated Lua spec emits fields in the supported order by construction.
-- **Lint locally.** Run `renovate-config-validator` on the config, then
-  `renovate --dry-run --print-config` (LOG_LEVEL=debug) against a checkout
-  to see which dependencies the managers actually pick up before pushing.
-
-### vim-plug
-
-```vim
-" tag-tracked
-Plug 'ggandor/leap.nvim', { 'commit': 'abc1234567890abcdef0123456789abcdef0123', 'tag': 'v0.1.5' }
-
-" branch-tracked
-Plug 'folke/which-key.nvim', { 'commit': 'def5678...', 'branch': 'main' }
-```
-
-The same field-order rule applies: `commit` and `tag`/`branch` should be
-the first keys inside the spec dict.
+- `-- tag: <ref>` → managed by `github-tags` datasource. Renovate opens a
+  PR whenever a newer tag exists on the upstream repo and atomically
+  rewrites both the commit hash and the annotation.
+- `-- branch: <name>` → managed by `git-refs` datasource. Renovate opens a
+  PR whenever the branch's HEAD moves and rewrites the commit hash; the
+  annotation stays as-is (the branch name itself does not change).
 
 ### lazy-lock.json (with url augmentation)
 
-`lazy-lock.json` is keyed by plugin short name, not `owner/repo`, so Renovate can't identify a plugin from the lockfile alone. The `:lazy-nvim-lock` preset works on lockfile entries that **also carry a `url` field**:
+`lazy-lock.json` is keyed by plugin short name, not `owner/repo`, so
+Renovate cannot identify a plugin from the lockfile alone. The
+`:lazy-nvim-lock` preset works on lockfile entries that **also carry a
+`url` field**:
 
 ```json
 {
   "telescope.nvim": {
     "branch": "master",
-    "commit": "abc1234567890abcdef0123456789abcdef0123",
+    "commit": "abc12345...ef012345",
     "url": "https://github.com/nvim-telescope/telescope.nvim"
   }
 }
 ```
 
-lazy.nvim emits `url` for non-default sources but not for default GitHub plugins. Use the bootstrap helper below to augment the lockfile.
-
-## Bootstrap helper (`lazy-pin-extract.lua`)
-
-A small Lua module is included under [`bootstrap/lazy-pin-extract.lua`](bootstrap/lazy-pin-extract.lua) for users who want Renovate to manage `lazy-lock.json` directly or who prefer the vimpin schema without adopting the vimpin CLI.
-
-Two entry points:
-
-```vim
-:lua require('lazy-pin-extract').augment_lock()
-" Adds the missing "url" field to every entry in lazy-lock.json, in place.
-" Run this after Plug install or whenever you add new plugins. Commit the
-" augmented file; Renovate (via :lazy-nvim-lock) takes it from there.
-
-:lua require('lazy-pin-extract').to_vimpin_manifest()
-" Writes lazy-pins.toml in vimpin schema by combining lazy.nvim's runtime
-" plugin URLs with lazy-lock.json's commits and your spec's tag/branch.
-```
-
-Install by copying the file to a path Neovim can `require`, for example:
-
-```bash
-mkdir -p ~/.config/nvim/lua
-curl -fsSL https://raw.githubusercontent.com/gr1m0h/vimpin-renovate-config/main/bootstrap/lazy-pin-extract.lua \
-  -o ~/.config/nvim/lua/lazy-pin-extract.lua
-```
-
-### Headless invocation
-
-`augment_lock()` depends on lazy.nvim's runtime plugin index, so lazy must
-be fully loaded before the call. From a headless shell:
-
-```bash
-nvim --headless \
-  -c "lua require('lazy').sync({wait = true})" \
-  -c "lua require('lazy-pin-extract').augment_lock()" \
-  -c "qa!"
-```
-
-Without the `Lazy sync`/`Lazy load` step first, `lazy.plugins()` may
-return an empty or partial list and entries will be silently skipped.
+lazy.nvim emits `url` for non-default sources but not for default GitHub
+plugins. If you need `lazy-lock.json` to be Renovate-managed, post-process
+the file once to add the missing `url` fields (any small Lua snippet that
+walks `lazy.plugins()` and writes them back will do). When using vimpin
+itself, the lockfile is informational only — the canonical Lua spec is
+the source of truth, so this preset is mostly relevant to users who have
+not adopted vimpin yet.
 
 ## How updates land
 
-For each matched entry, Renovate opens a PR that bumps the `commit` value (`currentDigest`) and, where applicable, the `tag`, `branch`, or `version` value (`currentValue`). The actual checkout still happens through your plugin manager — vimpin or otherwise — so nothing in this preset depends on how plugins are installed.
+For each matched entry, Renovate opens a PR that bumps the `commit` value
+(`currentDigest`) and, where applicable, the annotation (`currentValue`).
+Because both halves of the entry are captured in the same regex match,
+they update together — drift between commit and annotation is
+structurally impossible while Renovate is the sole updater.
+
+The actual checkout still happens through lazy.nvim — nothing in this
+preset depends on how plugins are installed.
 
 ## Recommended companion config
 
@@ -203,7 +128,7 @@ schedule produces a PR storm. A reasonable starting config:
   "packageRules": [
     {
       "matchManagers": ["custom.regex"],
-      "matchFileNames": ["**/vimpin.toml"],
+      "matchFileNames": ["**/*.lua"],
       "groupName": "vimpin-pinned",
       "addLabels": ["vimpin"]
     },
@@ -232,10 +157,18 @@ itself stays neutral on policy.
 
 ## Caveats
 
-- **`lazy-lock.json` requires `url`.** Without it, Renovate cannot map a short name back to a repository. Run `lazy-pin-extract.augment_lock()` once to populate `url`, then commit.
-- **Field order matters for Lua / vim-plug specs.** The regex managers expect pinning fields (`commit`, `tag`, `branch`, `version`) to appear right after the repo name. Custom config (`event`, `keys`, `opts`, `config = function()`) must come afterward, or Renovate will silently skip the entry.
-- **Tag-only tracking** is supported but does not lock to a commit; Renovate just bumps the tag value when a newer release exists.
-- **Frozen entries** (`commit` only, no `tag`/`branch`/`version`) are intentionally invisible to Renovate. That is the supported way to say "do not update".
+- **Field order matters.** `commit` must come immediately after the
+  positional repo string. Custom fields (`event`, `keys`, `opts`,
+  `config = function()`) must come *after* the commit, not before. Use
+  `vimpin run` to enforce this layout automatically.
+- **Annotation must follow commit on the same line.** Comments placed
+  elsewhere (above the spec, on the repo line, after `}` in multi-line
+  specs) are ignored.
+- **No HEAD-only tracking.** Specs with neither a `-- tag:` nor a `-- branch:`
+  annotation are invisible to Renovate. That is the supported way to say
+  "do not update this plugin": pin the commit, omit the annotation.
+- **`lazy-lock.json` requires `url`.** Without it, Renovate cannot map a
+  short name back to a repository.
 
 ## License
 

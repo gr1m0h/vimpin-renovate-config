@@ -1,10 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "Renovate preset for pinning Vim/Neovim plugins by commit hash. Bundles managers for vimpin.toml, lazy.nvim/packer.nvim Lua specs, vim-plug specs, and lazy.nvim lazy-lock.json.",
+  "description": "Renovate preset for pinning Vim/Neovim plugins by commit hash. Bundles managers for vimpin-canonical Lua specs and the lazy.nvim lazy-lock.json (with url augmentation).",
   "extends": [
-    "github>gr1m0h/vimpin-renovate-config:vimpin",
     "github>gr1m0h/vimpin-renovate-config:lua-pin",
-    "github>gr1m0h/vimpin-renovate-config:vim-plug",
     "github>gr1m0h/vimpin-renovate-config:lazy-nvim-lock"
   ]
 }
