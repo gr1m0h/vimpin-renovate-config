@@ -170,6 +170,16 @@ itself stays neutral on policy.
 - **`lazy-lock.json` requires `url`.** Without it, Renovate cannot map a
   short name back to a repository.
 
+## Roadmap
+
+Tracked as [GitHub Issues](https://github.com/gr1m0h/vimpin-renovate-config/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement):
+
+- **`lazy-lock.json` `url` augmentation helper** ([#1](https://github.com/gr1m0h/vimpin-renovate-config/issues/1)) — script that adds the `url` field lazy.nvim omits for default GitHub plugins
+- **packer.nvim spec preset** ([#2](https://github.com/gr1m0h/vimpin-renovate-config/issues/2)) — pair with the planned packer adapter in vimpin
+- **vim-plug spec preset** ([#3](https://github.com/gr1m0h/vimpin-renovate-config/issues/3)) — VimScript-side managers for `Plug 'owner/repo', { 'commit': '...' }`
+- **Multi-host source URL support** ([#4](https://github.com/gr1m0h/vimpin-renovate-config/issues/4)) — gitlab.com / sr.ht / custom hosts
+- **Expanded regex test cases** ([#5](https://github.com/gr1m0h/vimpin-renovate-config/issues/5)) — edge layouts and silent-skip regressions
+
 ## License
 
 MIT
