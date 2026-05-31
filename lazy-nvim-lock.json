@@ -6,7 +6,7 @@
       "customType": "regex",
       "description": "lazy-lock.json: GitHub entry with branch + commit + url",
       "managerFilePatterns": [
-        "(^|/)lazy-lock\\.json$"
+        "/(^|/)lazy-lock\\.json$/"
       ],
       "matchStrings": [
         "\"branch\"\\s*:\\s*\"(?<currentValue>[^\"]+)\"\\s*,\\s*\"commit\"\\s*:\\s*\"(?<currentDigest>[a-f0-9]{40})\"\\s*,\\s*\"url\"\\s*:\\s*\"https?://github\\.com/(?<depName>[^\"]+?)(?:\\.git)?\""
@@ -18,7 +18,7 @@
       "customType": "regex",
       "description": "lazy-lock.json: GitLab entry with branch + commit + url",
       "managerFilePatterns": [
-        "(^|/)lazy-lock\\.json$"
+        "/(^|/)lazy-lock\\.json$/"
       ],
       "matchStrings": [
         "\"branch\"\\s*:\\s*\"(?<currentValue>[^\"]+)\"\\s*,\\s*\"commit\"\\s*:\\s*\"(?<currentDigest>[a-f0-9]{40})\"\\s*,\\s*\"url\"\\s*:\\s*\"(?<packageName>https?://gitlab\\.com/[^\"]+?)(?:\\.git)?\""
@@ -30,7 +30,7 @@
       "customType": "regex",
       "description": "lazy-lock.json: sourcehut entry with branch + commit + url",
       "managerFilePatterns": [
-        "(^|/)lazy-lock\\.json$"
+        "/(^|/)lazy-lock\\.json$/"
       ],
       "matchStrings": [
         "\"branch\"\\s*:\\s*\"(?<currentValue>[^\"]+)\"\\s*,\\s*\"commit\"\\s*:\\s*\"(?<currentDigest>[a-f0-9]{40})\"\\s*,\\s*\"url\"\\s*:\\s*\"(?<packageName>https?://git\\.sr\\.ht/[^\"]+)\""

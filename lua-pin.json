@@ -6,7 +6,7 @@
       "customType": "regex",
       "description": "Lua spec: tag-tracked pin (canonical comment-form)",
       "managerFilePatterns": [
-        "\\.lua$"
+        "/\\.lua$/"
       ],
       "matchStrings": [
         "\"(?<depName>[^\"]+/[^\"]+)\"\\s*,\\s*commit\\s*=\\s*\"(?<currentDigest>[a-f0-9]{40})\"[^\\n]*?--\\s*tag:\\s*(?<currentValue>\\S+)"
@@ -18,7 +18,7 @@
       "customType": "regex",
       "description": "Lua spec: branch-tracked pin (canonical comment-form)",
       "managerFilePatterns": [
-        "\\.lua$"
+        "/\\.lua$/"
       ],
       "matchStrings": [
         "\"(?<depName>[^\"]+/[^\"]+)\"\\s*,\\s*commit\\s*=\\s*\"(?<currentDigest>[a-f0-9]{40})\"[^\\n]*?--\\s*branch:\\s*(?<currentValue>\\S+)"
