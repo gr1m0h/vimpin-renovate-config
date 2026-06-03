@@ -38,12 +38,12 @@ output (commit hash abbreviated with `...` for readability):
 
 ```lua
 -- Form A: single-line spec
-{ "ggandor/leap.nvim", commit = "8a40d3aa...07b9079b" }, -- tag: v0.1.5
+{ "example/example.nvim", commit = "deadbeef...cafebabe" }, -- tag: v0.1.5
 
 -- Form B: multi-line spec
 {
-  "folke/which-key.nvim",
-  commit = "3aab2147...0a44c15a", -- branch: main
+  "example/example.nvim",
+  commit = "deadbeef...cafebabe", -- branch: main
   keys = { "<leader>" },
   config = function() end,
 }
@@ -84,8 +84,8 @@ Renovate cannot identify a plugin from the lockfile alone. The
 {
   "telescope.nvim": {
     "branch": "master",
-    "commit": "abc12345...ef012345",
-    "url": "https://github.com/nvim-telescope/telescope.nvim"
+    "commit": "deadbeef...cafebabe",
+    "url": "https://github.com/example/example.nvim"
   }
 }
 ```
