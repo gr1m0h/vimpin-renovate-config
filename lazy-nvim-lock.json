@@ -33,7 +33,7 @@
         "/(^|/)lazy-lock\\.json$/"
       ],
       "matchStrings": [
-        "\"branch\"\\s*:\\s*\"(?<currentValue>[^\"]+)\"\\s*,\\s*\"commit\"\\s*:\\s*\"(?<currentDigest>[a-f0-9]{40})\"\\s*,\\s*\"url\"\\s*:\\s*\"(?<packageName>https?://git\\.sr\\.ht/[^\"]+)\""
+        "\"branch\"\\s*:\\s*\"(?<currentValue>[^\"]+)\"\\s*,\\s*\"commit\"\\s*:\\s*\"(?<currentDigest>[a-f0-9]{40})\"\\s*,\\s*\"url\"\\s*:\\s*\"(?<packageName>https?://git\\.sr\\.ht/[^\"]+?)(?:\\.git)?\""
       ],
       "datasourceTemplate": "git-refs",
       "depNameTemplate": "{{packageName}}"

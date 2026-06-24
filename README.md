@@ -92,8 +92,16 @@ Renovate cannot identify a plugin from the lockfile alone. The
 
 lazy.nvim emits `url` for non-default sources but not for default GitHub
 plugins. If you need `lazy-lock.json` to be Renovate-managed, post-process
-the file once to add the missing `url` fields (any small Lua snippet that
-walks `lazy.plugins()` and writes them back will do). When using vimpin
+the file once to add the missing `url` fields.
+
+> **Field order is required.** The managers match each entry with a single
+> regex, so the keys must appear in the order **`branch`, `commit`, `url`**
+> (exactly as shown above). An augmentation snippet that emits a different
+> key order produces **zero matches with no error**. When you write the
+> snippet that walks `lazy.plugins()` and rewrites the lockfile, emit the
+> three keys in that order.
+
+When using vimpin
 itself, the lockfile is informational only — the canonical Lua spec is
 the source of truth, so this preset is mostly relevant to users who have
 not adopted vimpin yet.
@@ -128,7 +136,7 @@ schedule produces a PR storm. A reasonable starting config:
   "packageRules": [
     {
       "matchManagers": ["custom.regex"],
-      "matchFileNames": ["**/*.lua"],
+      "matchFileNames": ["**/*.lua", "**/lazy-lock.json"],
       "groupName": "vimpin-pinned",
       "addLabels": ["vimpin"]
     },
@@ -167,8 +175,9 @@ itself stays neutral on policy.
 - **No HEAD-only tracking.** Specs with neither a `-- tag:` nor a `-- branch:`
   annotation are invisible to Renovate. That is the supported way to say
   "do not update this plugin": pin the commit, omit the annotation.
-- **`lazy-lock.json` requires `url`.** Without it, Renovate cannot map a
-  short name back to a repository.
+- **`lazy-lock.json` requires `url`, in `branch`/`commit`/`url` order.**
+  Without `url`, Renovate cannot map a short name back to a repository; with
+  the keys in any other order the entry silently fails to match.
 
 ## License
 
