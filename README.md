@@ -31,6 +31,19 @@ extend the sub-preset directly:
 
 The bare `github>gr1m0h/vimpin-renovate-config` extends both.
 
+### Pinning a version
+
+The examples above track the default branch. To pin a released version,
+append `#<ref>` (a tag or commit SHA):
+
+```json
+{ "extends": ["github>gr1m0h/vimpin-renovate-config#v0.1.0"] }
+```
+
+Releases are cut by [tagpr](https://github.com/Songmu/tagpr); see the
+[Releases](https://github.com/gr1m0h/vimpin-renovate-config/releases) page
+for available versions.
+
 ## Supported Lua spec form
 
 The `:lua-pin` manager looks for entries shaped like vimpin's canonical
