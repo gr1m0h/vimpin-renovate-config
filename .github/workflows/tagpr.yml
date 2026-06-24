@@ -1,0 +1,34 @@
+name: tagpr
+# Maintains a release PR on every push to main. Merging it cuts the next
+# semver tag and publishes a GitHub Release with auto-generated notes
+# (release = true in .tagpr). This is a Renovate preset repo, so there is
+# nothing to build — consumers pin a released version, e.g.
+# `"extends": ["github>gr1m0h/vimpin-renovate-config#v0.1.0"]` (or a SHA).
+#
+# tagpr creates the vX.Y.Z tag through the GitHub API, so the tag is
+# web-flow signed and satisfies the repo's tag-protection ruleset
+# (required_signatures). The workflow uses GITHUB_TOKEN end-to-end.
+#
+# Bump kind is controlled by labels on merged PRs:
+#   tagpr:minor / tagpr:major (default: patch).
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  tagpr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          fetch-depth: 0
+      - uses: Songmu/tagpr@e84001bd5dac8defa0c75b3913937d284a3b3660 # v1.20.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
